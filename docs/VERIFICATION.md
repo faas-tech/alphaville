@@ -35,3 +35,13 @@ The second visual pass was checked in native Chrome after simplifying headings a
 All six surfaces and the idea-detail page were inspected again in native Chrome after removing decorative numbers. Workspace task headings, pipeline counts, builder sections, the historical book, cash flows and design-system sections render without empty number gutters. Ordinary counts remain visible without leading zeros; idea IDs, financial values and quarter labels retain their meaning.
 
 The builder advanced through Assemble, Review terms and Save review using named current/completed states. Selecting Demo book A loaded 25 recorded purchases across 3 profiles with 1 fully covered profile. The default cash-flow scenario still showed 116.00% across eight quarters. The workspace was reloaded to clear the local QA state and left open with the animated alpha intact. The final 19 tests, strict typecheck and production build passed. Narrow-screen, screen-reader and cross-browser acceptance remain unverified.
+
+## Fable review fix cycle
+
+The original review is preserved unchanged. The response is in `docs/reviews/fable-review-resolutions.md`.
+
+Automated coverage now includes per-idea evidence consistency, indicative-versus-fixed term labels, fictional comparison-reference integrity, command-menu arrow movement and targeted accessibility/review-panel wiring checks. These checks supplement the existing financial and no-decorative-numbering regressions. Native visual and keyboard acceptance for this fix cycle is pending; earlier browser findings above describe earlier versions.
+
+## Handoff verification, 12 November 2026
+
+After recovering the unfinished fix cycle, all 35 tests, strict TypeScript and the production build passed. The production preview starts on loopback port 8872. Public GitHub access was verified through an unauthenticated repository API request. This recovery pass did not repeat native browser or screen-reader acceptance; the pending visual limits above remain explicit.

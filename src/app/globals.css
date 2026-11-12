@@ -4465,3 +4465,117 @@ label > small {
     gap: 14px 18px;
   }
 }
+
+/* Demo review fixes: reachable rail, truthful diagrams, visible review state. */
+.sidebar {
+  height: 100dvh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
+  scroll-padding-block: 16px;
+}
+.sidebar > * {
+  flex-shrink: 0;
+}
+.nav-item {
+  gap: 8px;
+  padding-inline: 8px;
+}
+.nav-item > span {
+  white-space: nowrap;
+  font-size: 13px;
+}
+.nav-item > svg,
+.nav-item > small {
+  flex-shrink: 0;
+}
+.nav-item > small {
+  margin-left: auto;
+}
+.idea-motif {
+  width: 70%;
+  height: 68px;
+}
+.term-sheet {
+  max-height: calc(100dvh - 48px);
+  overflow-y: auto;
+  scroll-padding-block: 16px;
+}
+.term-sheet .alert {
+  margin: 18px 0;
+  padding: 12px;
+}
+.term-sheet .alert strong {
+  font-size: 13px;
+}
+.term-sheet .alert p {
+  font-size: 12px;
+}
+.saved-review-receipt {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px;
+  margin-top: 16px;
+  border: 1px solid var(--success);
+  background: var(--success-soft);
+  color: var(--success);
+  border-radius: 4px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.saved-review-receipt:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.comparison-caption {
+  caption-side: top;
+  white-space: normal;
+  text-align: left;
+  padding: 18px 16px;
+  border-bottom: 1px solid var(--rule);
+  background: var(--paper);
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.65;
+}
+.comparison-caption strong {
+  display: block;
+  color: var(--ink);
+  font-size: 14px;
+  margin-bottom: 7px;
+}
+.comparison-caption > span {
+  display: block;
+}
+.comparison-caption p {
+  margin-top: 9px;
+}
+.search-results > button:focus-visible {
+  background: var(--accent-soft);
+  outline-offset: -2px;
+}
+.search-foot {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.input-unit input {
+  font-size: 15px;
+}
+@media (max-width: 1000px) {
+  .term-sheet {
+    max-height: none;
+    overflow-y: visible;
+  }
+}
+@media (max-width: 760px) {
+  .nav-item {
+    padding-inline: 0;
+  }
+  .nav-item > span {
+    font-size: 0;
+  }
+  .input-unit input {
+    font-size: 16px;
+  }
+}

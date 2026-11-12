@@ -4,6 +4,12 @@ An editorial research desk for structured ideas, historical context and transpar
 
 **Local design prototype. Synthetic data only.** There are no external APIs, pricing services, live research models, email integrations, orders, financial actions or real client records. Nothing in this repository is investment advice, an executable quote, or a suitability assessment.
 
+## Adopting this design in another application
+
+Start with [the implementation handoff](docs/IMPLEMENTATION-HANDOFF.md). It maps reusable tokens, components and frontend patterns, defines integration boundaries, and includes a copy-ready prompt for the recipient's coding agent. Use this prototype as a reference while preserving the receiving application's business logic and backend.
+
+The public repository's default branch is `prototype/edition-01`. Public access means the code can be read and cloned without an invitation; see the handoff for asset and licensing considerations.
+
 ## Run
 
 Node.js 20.9 or later:

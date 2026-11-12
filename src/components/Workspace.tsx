@@ -6,6 +6,7 @@ import {
   ideas,
   instruments,
   clients,
+  comparisonReference,
   type Idea,
   type Stage,
   type Client,
@@ -17,6 +18,9 @@ import {
   scenarioCashflows,
   validateTerms,
 } from "@/lib/contracts.mjs";
+
+import { evidenceCoverage, termValueLabel } from "@/lib/presentation.mjs";
+import { nextSearchIndex } from "@/lib/search.mjs";
 
 type View =
   | "Workspace"
@@ -110,25 +114,30 @@ function Note({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
-function MiniChart({ variant = 0 }: { variant?: number }) {
-  const lines = [
-    "0,58 15,51 28,54 42,35 54,42 69,29 80,34 94,16 108,24 122,11 138,16 155,7",
-    "0,45 18,41 32,51 48,32 62,36 78,20 94,28 109,17 122,24 140,12 155,18",
-    "0,55 15,40 30,43 45,31 60,40 75,24 90,30 108,17 125,20 140,10 155,13",
-  ];
+function IdeaMotif({ variant = 0 }: { variant?: number }) {
   return (
     <svg
-      className="mini-chart"
+      className="idea-motif"
       viewBox="0 0 155 68"
       fill="none"
       aria-hidden="true"
     >
-      <path d="M0 65H155" stroke="currentColor" opacity=".18" />
-      <polyline
-        points={lines[variant % 3]}
+      <g
         stroke="currentColor"
-        strokeWidth="2"
-      />
+        strokeWidth="1.2"
+        opacity=".65"
+        transform={`rotate(${(variant % 3) * 30} 77.5 34)`}
+      >
+        <ellipse cx="77.5" cy="34" rx="33" ry="19" />
+        <ellipse cx="77.5" cy="34" rx="19" ry="33" />
+        <rect
+          x="65.5"
+          y="22"
+          width="24"
+          height="24"
+          transform="rotate(45 77.5 34)"
+        />
+      </g>
     </svg>
   );
 }
@@ -137,7 +146,7 @@ function Basket({ ids }: { ids: string[] }) {
     <div className="basket">
       {ids.map((id) => (
         <span key={id} title={instruments.find((i) => i.id === id)?.name}>
-          {id.replace("MOCK-", "")}
+          {id}
         </span>
       ))}
     </div>
@@ -159,8 +168,7 @@ function IdeaCard({
         {showStage && <StageTag stage={idea.stage} />}
       </div>
       <div className={`idea-visual ${idea.color}`}>
-        <span className="visual-cross">+</span>
-        <MiniChart variant={ideas.indexOf(idea)} />
+        <IdeaMotif variant={ideas.indexOf(idea)} />
       </div>
       <h3>{idea.title}</h3>
       <p>{idea.subtitle}</p>
@@ -184,10 +192,12 @@ export function Workspace() {
   const [toast, setToast] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [searchIndex, setSearchIndex] = useState(0);
   const [saved, setSaved] = useState<string[]>([]);
   const [notifications, setNotifications] = useState(false);
   const searchRef = useRef<HTMLDialogElement>(null);
   const searchInput = useRef<HTMLInputElement>(null);
+  const searchResultsRef = useRef<HTMLDivElement>(null);
   const mainRef = useRef<HTMLElement>(null);
   const navigate = (next: View) => {
     setUnknown(false);
@@ -260,6 +270,7 @@ export function Workspace() {
   }, []);
   useEffect(() => {
     if (searchOpen) {
+      setSearchIndex(0);
       searchRef.current?.showModal();
       searchInput.current?.focus();
     } else searchRef.current?.close();
@@ -303,6 +314,8 @@ export function Workspace() {
               key={n.view}
               className={`nav-item ${view === n.view ? "active" : ""}`}
               onClick={() => navigate(n.view)}
+              aria-label={n.label}
+              title={n.label}
               aria-current={view === n.view ? "page" : undefined}
             >
               <Icon name={n.icon} />
@@ -334,6 +347,9 @@ export function Workspace() {
           <button
             className={`nav-item ${view === "Design system" ? "active" : ""}`}
             onClick={() => navigate("Design system")}
+            aria-label="Design system"
+            title="Design system"
+            aria-current={view === "Design system" ? "page" : undefined}
           >
             <Icon name="palette" />
             <span>Design system</span>
@@ -437,6 +453,9 @@ export function Workspace() {
             <IdeaDetail
               idea={selected}
               onBack={() => navigate(origin)}
+              backLabel={
+                navigation.find((item) => item.view === origin)?.label ?? origin
+              }
               onBuild={() => build(selected)}
               onSave={() => save(selected.id)}
               saved={saved.includes(selected.id)}
@@ -500,6 +519,34 @@ export function Workspace() {
       <dialog
         ref={searchRef}
         className="search-dialog"
+        onKeyDown={(event) => {
+          const buttons = Array.from(
+            searchResultsRef.current?.querySelectorAll<HTMLButtonElement>(
+              "button",
+            ) ?? [],
+          );
+          if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+            event.preventDefault();
+            const focused = buttons.indexOf(
+              document.activeElement as HTMLButtonElement,
+            );
+            const next = nextSearchIndex(
+              focused,
+              buttons.length,
+              event.key === "ArrowDown" ? 1 : -1,
+            );
+            if (next >= 0) {
+              setSearchIndex(next);
+              buttons[next].focus();
+            }
+          } else if (
+            event.key === "Enter" &&
+            event.target === searchInput.current
+          ) {
+            event.preventDefault();
+            buttons[Math.min(searchIndex, buttons.length - 1)]?.click();
+          }
+        }}
         onCancel={() => setSearchOpen(false)}
         onClick={(e) => {
           if (e.target === e.currentTarget) setSearchOpen(false);
@@ -512,7 +559,11 @@ export function Workspace() {
               ref={searchInput}
               aria-label="Search ideas and tools"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setSearchIndex(0);
+              }}
+              aria-describedby="command-search-help"
               placeholder="Search ideas, tools, evidence…"
             />
             <button
@@ -523,7 +574,7 @@ export function Workspace() {
               <Icon name="close" />
             </button>
           </div>
-          <div className="search-results">
+          <div className="search-results" ref={searchResultsRef}>
             <p className="eyebrow">TOOLS & IDEAS</p>
             {navigation
               .filter((n) =>
@@ -581,7 +632,9 @@ export function Workspace() {
           </div>
           <div className="search-foot">
             <span>Searches the examples in this prototype</span>
-            <kbd>ESC to close</kbd>
+            <kbd id="command-search-help">
+              ↑↓ choose · Enter open · Esc close
+            </kbd>
           </div>
         </div>
       </dialog>
@@ -833,6 +886,7 @@ function Pipeline({
               key={f}
               onClick={() => setFilter(f)}
               className={filter === f ? "selected" : ""}
+              aria-pressed={filter === f}
             >
               {f}
               {f === "All ideas" && <small>{ideas.length}</small>}
@@ -935,7 +989,7 @@ function Pipeline({
                   </td>
                   <td>{i.category}</td>
                   <td className="mono">{i.tenor} months</td>
-                  <td>{i.coverage}</td>
+                  <td>{evidenceCoverage(i.evidence)}</td>
                   <td>
                     <button
                       className="icon-button"
@@ -959,6 +1013,7 @@ function Pipeline({
 }
 function IdeaDetail({
   idea,
+  backLabel,
   onBack,
   onBuild,
   onSave,
@@ -966,6 +1021,7 @@ function IdeaDetail({
   onClients,
 }: {
   idea: Idea;
+  backLabel: string;
   onBack: () => void;
   onBuild: () => void;
   onSave: () => void;
@@ -977,7 +1033,7 @@ function IdeaDetail({
     <>
       <button className="back-link" onClick={onBack}>
         <Icon name="back" size={16} />
-        Back to the desk
+        Back to {backLabel}
       </button>
       <div className="detail-heading">
         <div className="card-top">
@@ -1003,6 +1059,7 @@ function IdeaDetail({
         {["Research", "Draft terms", "Evidence"].map((t) => (
           <button
             className={tab === t ? "selected" : ""}
+            aria-pressed={tab === t}
             onClick={() => setTab(t)}
             key={t}
           >
@@ -1084,23 +1141,18 @@ function IdeaDetail({
           ) : (
             <section className="article-section">
               <h2>Sources and missing evidence</h2>
-              {[
-                "Example research note",
-                "Reason for the proposed structure",
-                "Example purchase records",
-                "Independent market source",
-              ].map((s, i) => (
-                <div className="evidence-row" key={s}>
+              {idea.evidence.map((source) => (
+                <div className="evidence-row" key={source.id}>
                   <div>
-                    <strong>{s}</strong>
+                    <strong>{source.label}</strong>
                     <p>
-                      {i < 3
-                        ? "Written for this example on 12 November 2026. Not externally verified."
-                        : "Not connected · requires independent verification"}
+                      {source.available
+                        ? "Fictional source written for this example. Not independently verified."
+                        : "Source missing from this example."}
                     </p>
                   </div>
-                  <Tag tone={i < 3 ? "neutral" : "amber"}>
-                    {i < 3 ? "Example" : "Missing"}
+                  <Tag tone={source.available ? "neutral" : "amber"}>
+                    {source.available ? "Example available" : "Missing"}
                   </Tag>
                 </div>
               ))}
@@ -1125,7 +1177,7 @@ function IdeaDetail({
             </div>
             <div>
               <dt>Research coverage</dt>
-              <dd>{idea.coverage}</dd>
+              <dd>{evidenceCoverage(idea.evidence)}</dd>
             </div>
             <div>
               <dt>Snapshot</dt>
@@ -1185,21 +1237,11 @@ function TermsSummary({ terms }: { terms: Terms }) {
       </div>
       <div>
         <dt>Annual coupon</dt>
-        <dd className="mono">
-          {terms.family === "Protected participation"
-            ? "Not applicable"
-            : terms.coupon === ""
-              ? "Not entered"
-              : `${terms.coupon}% p.a.`}
-        </dd>
+        <dd className="mono">{termValueLabel(terms, "coupon")}</dd>
       </div>
       <div>
         <dt>Reoffer</dt>
-        <dd className="mono">
-          {terms.reoffer === ""
-            ? "Not entered"
-            : `${terms.reoffer}% of nominal`}
-        </dd>
+        <dd className="mono">{termValueLabel(terms, "reoffer")}</dd>
       </div>
       <div>
         <dt>
@@ -1249,6 +1291,16 @@ function Builder({
   const [checked, setChecked] = useState(false);
   const [attempted, setAttempted] = useState(false);
   const [savedReview, setSavedReview] = useState(false);
+  const acknowledgementRef = useRef<HTMLInputElement>(null);
+  const savedReceiptRef = useRef<HTMLDivElement>(null);
+  const invalidationRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (invalidated)
+      invalidationRef.current?.scrollIntoView({
+        block: "nearest",
+        behavior: "auto",
+      });
+  }, [invalidated]);
   const update = (patch: Partial<Terms>) => {
     if (review || savedReview) setInvalidated(true);
     setReview(null);
@@ -1261,6 +1313,10 @@ function Builder({
     terms.family === "Capital-at-risk participation" ||
     terms.family === "Reverse autocallable";
   const reviewed = isReviewCurrent(terms, review);
+  useEffect(() => {
+    if (savedReview) savedReceiptRef.current?.focus();
+    else if (reviewed) acknowledgementRef.current?.focus();
+  }, [reviewed, savedReview]);
   const download = () => {
     const blob = new Blob(
       [JSON.stringify(createDraftExport(terms, review, savedReview), null, 2)],
@@ -1314,15 +1370,6 @@ function Builder({
         ))}
         <span className="connection-note">Pricing is not connected</span>
       </div>
-      {invalidated && (
-        <div className="alert amber" role="status">
-          <Icon name="info" />
-          <div>
-            <strong>Review cleared after your changes</strong>
-            <p>Check the updated terms before saving another review.</p>
-          </div>
-        </div>
-      )}
       <div className="builder-grid">
         <div className="builder-form">
           <section className="form-section">
@@ -1487,7 +1534,13 @@ function Builder({
                   />
                   <span>% p.a.</span>
                 </div>
-                <small>Yearly coupon rate entered for this example</small>
+                <small>
+                  {terms.family === "Protected participation"
+                    ? "This product has no coupon"
+                    : terms.solve === "Annual coupon"
+                      ? "Indicative placeholder; would be calculated if pricing were connected"
+                      : "Fixed yearly coupon rate for this draft"}
+                </small>
               </label>
               <label>
                 Reoffer
@@ -1504,7 +1557,11 @@ function Builder({
                   <span>%</span>
                 </div>
                 <small>
-                  Price as a percentage of the note’s reference amount
+                  {terms.family === "Protected participation" ||
+                  terms.solve === "Reoffer"
+                    ? "Indicative placeholder; would be calculated. "
+                    : "Fixed purchase price. "}
+                  Percentage of nominal, the note’s reference amount
                 </small>
               </label>
             </div>
@@ -1518,6 +1575,7 @@ function Builder({
                     <button
                       key={v}
                       className={terms.solve === v ? "chosen" : ""}
+                      aria-pressed={terms.solve === v}
                       onClick={() => update({ solve: v })}
                     >
                       <span className="radio-dot" />
@@ -1558,6 +1616,15 @@ function Builder({
           </div>
           <h2>Draft terms</h2>
           <TermsSummary terms={terms} />
+          {invalidated && (
+            <div className="alert amber" role="status" ref={invalidationRef}>
+              <Icon name="info" />
+              <div>
+                <strong>Review cleared after your changes</strong>
+                <p>Check the updated terms before saving another review.</p>
+              </div>
+            </div>
+          )}
           {attempted && errors.length > 0 && (
             <div className="field-errors" role="alert">
               <strong>Check these terms</strong>
@@ -1589,42 +1656,55 @@ function Builder({
             <div className="review-box">
               <div className="review-banner">
                 <Icon name="check" size={18} />
-                <strong>Terms ready to check</strong>
+                <strong>
+                  {savedReview ? "Review saved" : "Terms ready to check"}
+                </strong>
               </div>
               <p>
-                Check the terms above. Your saved review applies only to these
-                inputs.
+                {savedReview
+                  ? "This saved review applies only to the terms above."
+                  : "Check the terms above before saving your review."}
               </p>
-              <label className="check-label">
-                <input
-                  type="checkbox"
-                  checked={checked}
-                  onChange={(e) => setChecked(e.target.checked)}
-                />
-                <span>
-                  I have checked these example terms and the risk of losing
-                  principal.
-                </span>
-              </label>
-              <Button
-                primary
-                disabled={!checked || savedReview}
-                onClick={() => {
-                  setSavedReview(true);
-                  onToast(
-                    "Review saved for this session. No quote, order or external communication was created.",
-                  );
-                }}
-              >
-                {savedReview ? (
-                  <>
-                    <Icon name="check" size={17} />
-                    Review saved
-                  </>
-                ) : (
-                  "Save review"
-                )}
-              </Button>
+              {savedReview ? (
+                <div
+                  className="saved-review-receipt"
+                  role="status"
+                  tabIndex={-1}
+                  ref={savedReceiptRef}
+                >
+                  <Icon name="check" size={18} />
+                  <span>
+                    You checked and saved these terms for this session.
+                  </span>
+                </div>
+              ) : (
+                <>
+                  <label className="check-label">
+                    <input
+                      ref={acknowledgementRef}
+                      type="checkbox"
+                      checked={checked}
+                      onChange={(event) => setChecked(event.target.checked)}
+                    />
+                    <span>
+                      I have checked these example terms and the risk of losing
+                      principal.
+                    </span>
+                  </label>
+                  <Button
+                    primary
+                    disabled={!checked}
+                    onClick={() => {
+                      setSavedReview(true);
+                      onToast(
+                        "Review saved for this session. No quote, order or external communication was created.",
+                      );
+                    }}
+                  >
+                    Save review
+                  </Button>
+                </>
+              )}
             </div>
           )}
           <p className="sheet-footnote">
@@ -1783,6 +1863,20 @@ function ClientEvidence() {
           <div className={`client-content ${client ? "with-inspector" : ""}`}>
             <div className="table-wrap">
               <table>
+                <caption className="comparison-caption">
+                  <strong>
+                    Example reference: {comparisonReference.ideaId}{" "}
+                    {comparisonReference.label}
+                  </strong>
+                  <span>
+                    {comparisonReference.family} /{" "}
+                    {comparisonReference.currency} / {comparisonReference.tenor}{" "}
+                    months / {comparisonReference.barrier}% European maturity
+                    barrier
+                  </span>
+                  <span>{comparisonReference.basket.join(" / ")}</span>
+                  <p>{comparisonReference.notice}</p>
+                </caption>
                 <thead>
                   <tr>
                     <th>Fictional profile</th>
@@ -1987,6 +2081,9 @@ function Analytics() {
       <div className="analytics-grid">
         <section className="scenario-controls">
           <h2>Scenario inputs</h2>
+          <p className="form-caption">
+            These inputs are separate from your idea-builder draft.
+          </p>
           <label>
             Observation scenario
             <span className="select-shell">
@@ -2101,7 +2198,7 @@ function Analytics() {
                 <div>
                   <span>Principal repaid</span>
                   <strong>
-                    {principal?.toFixed(0)}
+                    {principal?.toFixed(2)}
                     <small>%</small>
                   </strong>
                 </div>
@@ -2340,6 +2437,7 @@ function DesignSystem({
               key={s}
               onClick={() => setState(s)}
               className={state === s ? "selected" : ""}
+              aria-pressed={state === s}
             >
               {s}
               <Icon name="arrow" size={16} />
