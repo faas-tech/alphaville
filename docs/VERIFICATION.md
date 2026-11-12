@@ -1,9 +1,10 @@
-# Verification / Edition 01
+# Verification
 
 ## Automated checks
 
 - TypeScript strict type checking.
-- Fifteen pure contract tests: valid draft, blank-versus-zero, genuine zero coupon, required basket, numeric bounds, exact review binding, barrier equality, below-barrier loss, zero principal, autocall termination, chart/table source reconciliation, protected-participation export/validation, captured-versus-reviewed state, and disabled maturity input handling.
+- Fifteen financial contract tests: valid draft, blank-versus-zero, genuine zero coupon, required basket, numeric bounds, exact review binding, barrier equality, below-barrier loss, zero principal, autocall termination, chart/table source reconciliation, protected-participation export/validation, captured-versus-reviewed state, and disabled maturity input handling.
+- Four source regression checks cover removal of decorative numbering, unpadded ordinary counts, retained financial identifiers/precision/periods, and the documented numbering/motion rules.
 - Independent package install and committed package lock; initial audit reported no vulnerabilities.
 
 ## Verified locally, 12 November 2026
@@ -28,3 +29,9 @@ Real pricing or model behavior, real client matching, investment suitability, fi
 ## Visual revision
 
 The second visual pass was checked in native Chrome after simplifying headings and status labels. Builder and client-book selectors align with neighboring controls; their arrows have consistent inset spacing. Keyboard selection still works. The pipeline no longer repeats a stage on cards inside its labeled column. Updated workflow icons and the client table were inspected in Day and Night themes.
+
+## Numbering cleanup
+
+All six surfaces and the idea-detail page were inspected again in native Chrome after removing decorative numbers. Workspace task headings, pipeline counts, builder sections, the historical book, cash flows and design-system sections render without empty number gutters. Ordinary counts remain visible without leading zeros; idea IDs, financial values and quarter labels retain their meaning.
+
+The builder advanced through Assemble, Review terms and Save review using named current/completed states. Selecting Demo book A loaded 25 recorded purchases across 3 profiles with 1 fully covered profile. The default cash-flow scenario still showed 116.00% across eight quarters. The workspace was reloaded to clear the local QA state and left open with the animated alpha intact. The final 19 tests, strict typecheck and production build passed. Narrow-screen, screen-reader and cross-browser acceptance remain unverified.

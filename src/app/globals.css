@@ -511,11 +511,6 @@ main {
   border-radius: 50%;
   background: var(--success);
 }
-.edition-strip b {
-  font-weight: 400;
-  color: var(--subtle);
-  margin-left: 7px;
-}
 .page-heading {
   display: flex;
   align-items: center;
@@ -637,10 +632,6 @@ h2 em {
   display: flex;
   gap: 12px;
   align-items: center;
-}
-.section-heading h2 > span {
-  font: 12px var(--mono);
-  color: var(--subtle);
 }
 .section-heading > .mono {
   font-size: 12px;
@@ -818,11 +809,6 @@ h2 em {
 }
 .radar-entry + .radar-entry {
   border-top: 1px solid var(--rule);
-}
-.radar-number {
-  font: 12px var(--mono);
-  color: var(--subtle);
-  padding-top: 3px;
 }
 .radar-entry h3 {
   font-size: 19px;
@@ -1154,10 +1140,6 @@ h2 em {
 .process-strip > div:last-child {
   border-right: 0;
 }
-.process-index {
-  font: 12px var(--mono);
-  color: var(--accent);
-}
 .process-strip strong {
   font-size: 13px;
   font-weight: 600;
@@ -1435,11 +1417,6 @@ td.mono {
   gap: 15px;
   margin: 20px 0;
 }
-.number {
-  font: 12px var(--mono);
-  color: var(--accent);
-  display: block;
-}
 .evidence-list strong {
   font-size: 15px;
 }
@@ -1514,21 +1491,8 @@ td.mono {
   align-items: center;
   gap: 10px;
 }
-.builder-progress b {
-  font: 12px var(--mono);
-  border: 1px solid var(--rule-strong);
-  border-radius: 50%;
-  width: 27px;
-  height: 27px;
-  display: grid;
-  place-items: center;
-}
 .builder-progress > .complete {
   color: var(--accent) !important;
-}
-.builder-progress .complete b {
-  background: var(--accent-soft);
-  border-color: var(--accent);
 }
 .builder-progress > i {
   width: 35px;
@@ -2853,9 +2817,6 @@ input[type="checkbox"] {
   .process-strip svg {
     width: 14px;
   }
-  .process-index {
-    font-size: 12px;
-  }
   .process-strip strong {
     font-size: 12px;
   }
@@ -2946,9 +2907,6 @@ input[type="checkbox"] {
     padding-block: 13px;
   }
   .edition-strip > span:last-child {
-    display: none;
-  }
-  .edition-strip b {
     display: none;
   }
   main {
@@ -3191,11 +3149,6 @@ input[type="checkbox"] {
   .builder-progress > span:not(.tag) {
     font-size: 12px;
     gap: 7px;
-  }
-  .builder-progress b {
-    width: 24px;
-    height: 24px;
-    font-size: 12px;
   }
   .builder-grid {
     gap: 0;
@@ -3566,11 +3519,6 @@ input[type="checkbox"] {
   .builder-progress > span:not(.tag) {
     font-size: 12px;
     gap: 5px;
-  }
-  .builder-progress b {
-    width: 21px;
-    height: 21px;
-    font-size: 12px;
   }
   .instrument-option {
     gap: 8px;
@@ -4475,5 +4423,45 @@ label > small {
   }
   .evidence-banner p {
     font-size: 14px;
+  }
+}
+
+/* Words and state guide the workflow; numbers are reserved for useful data. */
+.builder-progress {
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.builder-progress > span:not(.tag) {
+  gap: 8px;
+}
+.builder-progress > .current {
+  color: var(--accent);
+  font-weight: 600;
+}
+.workflow-state {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+.workflow-state > i {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 50%;
+}
+.current .workflow-state > i {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.system-rules h3 {
+  margin-top: 0;
+}
+@media (max-width: 760px) {
+  .builder-progress {
+    gap: 14px 18px;
   }
 }

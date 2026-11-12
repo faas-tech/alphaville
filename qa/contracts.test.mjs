@@ -1,5 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import {
   validateTerms,
   bindTerms,
@@ -130,4 +131,46 @@ test("autocall ignores the disabled maturity input but maturity requires it", ()
     );
   }
   assert.equal(scenarioCashflows(8, 60, "", 8, null), null);
+});
+
+// Guard against reintroducing the removed presentation-only numbers.
+const workspaceSource = readFileSync(
+  new URL("../src/components/Workspace.tsx", import.meta.url),
+  "utf8",
+);
+const designGuidance = readFileSync(
+  new URL("../docs/DESIGN-SYSTEM.md", import.meta.url),
+  "utf8",
+);
+test("section and list presentation has no decorative numbering", () => {
+  assert.doesNotMatch(workspaceSource, /<SectionHeading[^>]*\bnumber=/);
+  assert.doesNotMatch(workspaceSource, /className="(?:number|radar-number)"/);
+  assert.doesNotMatch(workspaceSource, /(?:EDITION\s+0\d|№\s*0\d)/);
+  assert.doesNotMatch(workspaceSource, /<b>0[123]<\/b>/);
+});
+test("ordinary counts are not padded for presentation", () => {
+  assert.doesNotMatch(workspaceSource, /\.padStart\(/);
+  assert.doesNotMatch(workspaceSource, /(?:count|value):\s*"0[1-9]"/);
+  assert.match(workspaceSource, /count: String\(ideas\.length\)/);
+  assert.match(workspaceSource, /\{shown\.length\}/);
+});
+test("necessary financial identifiers, precision and periods remain", () => {
+  assert.match(workspaceSource, /AV-014/);
+  assert.match(workspaceSource, /Quarter \{r\.quarter\}/);
+  assert.match(workspaceSource, /r\.coupon\.toFixed\(2\)/);
+  assert.match(workspaceSource, /r\.principal\.toFixed\(2\)/);
+  assert.match(workspaceSource, /client\.score/);
+  assert.match(
+    workspaceSource,
+    /aria-current=\{current \? "step" : undefined\}/,
+  );
+});
+test("design guidance prohibits decorative numbering and documents controlled identity motion", () => {
+  assert.match(designGuidance, /Do not add numbers for visual decoration/);
+  assert.match(
+    designGuidance,
+    /Keep a number only when it provides specific user value/,
+  );
+  assert.match(designGuidance, /ResearchOrb identity animation/);
+  assert.match(designGuidance, /visible pause control/);
 });

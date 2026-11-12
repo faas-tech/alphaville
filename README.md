@@ -57,4 +57,4 @@ Alphaville adapts the ruled editorial grid, dateline, asymmetric lead and type h
 
 Outfit and Figtree are licensed under the SIL Open Font License 1.1. See `public/fonts/licenses/` and [font attribution](docs/FONTS.md).
 
-See [design system](docs/DESIGN-SYSTEM.md), [scope](docs/SCOPE.md), and [verification](docs/VERIFICATION.md).
+See [design system](docs/DESIGN-SYSTEM.md), [scope](docs/SCOPE.md), [verification](docs/VERIFICATION.md), and [review handoff](docs/REVIEW-HANDOFF.md).

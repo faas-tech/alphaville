@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { Icon } from "./Icons";
+import { ResearchOrb } from "./ResearchOrb";
 import {
   ideas,
   instruments,
@@ -35,7 +36,7 @@ const navigation: {
     view: "Pipeline",
     label: "Opportunity pipeline",
     icon: "pipeline",
-    count: "06",
+    count: String(ideas.length),
   },
   { view: "Builder", label: "Idea builder", icon: "layers" },
   { view: "Clients", label: "Client evidence", icon: "clients" },
@@ -65,20 +66,15 @@ function StageTag({ stage }: { stage: Stage }) {
   );
 }
 function SectionHeading({
-  number,
   title,
   children,
 }: {
-  number: string;
   title: string;
   children?: React.ReactNode;
 }) {
   return (
     <div className="section-heading">
-      <h2>
-        <span>{number}</span>
-        {title}
-      </h2>
+      <h2>{title}</h2>
       {children}
     </div>
   );
@@ -317,7 +313,7 @@ export function Workspace() {
         </nav>
         <div className="sidebar-rule" />
         <div className="nav-label">
-          RECENT IDEAS <span>03</span>
+          RECENT IDEAS <span>{Math.min(3, ideas.length)}</span>
         </div>
         <div className="recent-list">
           {ideas.slice(0, 3).map((i, n) => (
@@ -341,7 +337,6 @@ export function Workspace() {
           >
             <Icon name="palette" />
             <span>Design system</span>
-            <span className="mono">01</span>
           </button>
           <div className="profile">
             <div className="avatar">AD</div>
@@ -421,7 +416,7 @@ export function Workspace() {
           <div className="edition-strip">
             <span>
               <i />
-              LOCAL EDITION <b>№ 001</b>
+              LOCAL PROTOTYPE
             </span>
             <span>THURSDAY, 12 NOVEMBER 2026</span>
             <span>SYNTHETIC DATA ONLY</span>
@@ -486,7 +481,6 @@ export function Workspace() {
             <span>
               Design example. Not investment advice or an executable quote.
             </span>
-            <span>EDITION 01</span>
           </footer>
         </main>
       </div>
@@ -623,25 +617,25 @@ function Dashboard({
         {[
           {
             label: "Ideas",
-            value: "06",
+            value: ideas.length,
             note: "Across four stages",
             icon: "pipeline",
           },
           {
             label: "Awaiting review",
-            value: "01",
+            value: ideas.filter((idea) => idea.stage === "Review").length,
             note: "Draft terms prepared",
             icon: "layers",
           },
           {
             label: "Recorded purchases",
-            value: "28",
+            value: clients.reduce((total, client) => total + client.count, 0),
             note: "Across 5 fictional profiles",
             icon: "clients",
           },
           {
             label: "Research questions",
-            value: "02",
+            value: ideas.filter((idea) => idea.stage === "Research").length,
             note: "Missing supporting sources",
             icon: "book",
           },
@@ -664,9 +658,7 @@ function Dashboard({
       <div className="front-grid">
         <section className="lead-story">
           <div className="section-heading">
-            <h2>
-              <span>01</span>Featured idea
-            </h2>
+            <h2>Featured idea</h2>
           </div>
           <div className="lead-inner">
             <div className="lead-copy">
@@ -689,25 +681,13 @@ function Dashboard({
               </Button>
             </div>
             <div className="lead-figure">
-              <div className="orbit-graphic" aria-hidden="true">
-                <div className="orbit orbit-1" />
-                <div className="orbit orbit-2" />
-                <div className="orbit orbit-3" />
-                <span className="orbit-center">α</span>
-                <span className="orbit-label orbit-label-1">VIEW</span>
-                <span className="orbit-label orbit-label-2">STRUCTURE</span>
-                <span className="orbit-label orbit-label-3">EVIDENCE</span>
-                <span className="orbit-point p1" />
-                <span className="orbit-point p2" />
-                <span className="orbit-point p3" />
-              </div>
+              <ResearchOrb />
             </div>
           </div>
         </section>
         <aside className="desk-notes">
-          <SectionHeading number="02" title="Research tasks" />
+          <SectionHeading title="Research tasks" />
           <div className="radar-entry">
-            <span className="radar-number">01</span>
             <div>
               <span className="editorial-status amber">Missing evidence</span>
               <h3>Check infrastructure demand</h3>
@@ -718,7 +698,6 @@ function Dashboard({
             </div>
           </div>
           <div className="radar-entry">
-            <span className="radar-number">02</span>
             <div>
               <h3>Compare past purchases</h3>
               <p>
@@ -736,9 +715,9 @@ function Dashboard({
         </aside>
       </div>
       <section className="pipeline-preview">
-        <SectionHeading number="03" title="Recent ideas">
+        <SectionHeading title="Recent ideas">
           <button className="text-link" onClick={() => onNavigate("Pipeline")}>
-            View pipeline <span className="count-chip">06</span>
+            View pipeline <span className="count-chip">{ideas.length}</span>
             <Icon name="arrow" size={17} />
           </button>
         </SectionHeading>
@@ -856,7 +835,7 @@ function Pipeline({
               className={filter === f ? "selected" : ""}
             >
               {f}
-              {f === "All ideas" && <small>06</small>}
+              {f === "All ideas" && <small>{ideas.length}</small>}
             </button>
           ))}
         </div>
@@ -905,12 +884,7 @@ function Pipeline({
             <section key={s} className="kanban-column">
               <div className="kanban-head">
                 <StageTag stage={s} />
-                <span>
-                  {filtered
-                    .filter((i) => i.stage === s)
-                    .length.toString()
-                    .padStart(2, "0")}
-                </span>
+                <span>{filtered.filter((i) => i.stage === s).length}</span>
               </div>
               {filtered
                 .filter((i) => i.stage === s)
@@ -1063,7 +1037,6 @@ function IdeaDetail({
               <section className="article-section">
                 <ul className="evidence-list">
                   <li>
-                    <span className="number">01</span>
                     <div>
                       <strong>What could cause a loss?</strong>
                       <p>
@@ -1073,7 +1046,6 @@ function IdeaDetail({
                     </div>
                   </li>
                   <li>
-                    <span className="number">02</span>
                     <div>
                       <strong>What independent evidence is missing?</strong>
                       <p>
@@ -1119,7 +1091,6 @@ function IdeaDetail({
                 "Independent market source",
               ].map((s, i) => (
                 <div className="evidence-row" key={s}>
-                  <span className="number">0{i + 1}</span>
                   <div>
                     <strong>{s}</strong>
                     <p>
@@ -1315,18 +1286,32 @@ function Builder({
           Export draft
         </Button>
       </div>
-      <div className="builder-progress">
-        <span className="complete">
-          <b>01</b>Assemble
-        </span>
-        <i />
-        <span className={reviewed ? "complete" : ""}>
-          <b>02</b>Review terms
-        </span>
-        <i />
-        <span className={savedReview ? "complete" : ""}>
-          <b>03</b>Save example
-        </span>
+      <div
+        className="builder-progress"
+        role="group"
+        aria-label="Draft workflow"
+      >
+        {[
+          { label: "Assemble", done: reviewed, current: !reviewed },
+          {
+            label: "Review terms",
+            done: savedReview,
+            current: reviewed && !savedReview,
+          },
+          { label: "Save review", done: savedReview, current: false },
+        ].map(({ label, done, current }) => (
+          <span
+            key={label}
+            className={done ? "complete" : current ? "current" : ""}
+            aria-current={current ? "step" : undefined}
+            aria-label={`${label}${done ? ", complete" : current ? ", current" : ", pending"}`}
+          >
+            <span className="workflow-state" aria-hidden="true">
+              {done ? <Icon name="check" size={14} /> : <i />}
+            </span>
+            {label}
+          </span>
+        ))}
         <span className="connection-note">Pricing is not connected</span>
       </div>
       {invalidated && (
@@ -1341,7 +1326,7 @@ function Builder({
       <div className="builder-grid">
         <div className="builder-form">
           <section className="form-section">
-            <SectionHeading number="01" title="Choose the structure" />
+            <SectionHeading title="Choose the structure" />
             <div className="form-grid">
               <label>
                 Product family
@@ -1400,7 +1385,7 @@ function Builder({
             )}
           </section>
           <section className="form-section">
-            <SectionHeading number="02" title="Define the basket" />
+            <SectionHeading title="Define the basket" />
             <p className="form-caption">
               Choose from these fictional listings. No real instruments are
               connected.
@@ -1438,7 +1423,7 @@ function Builder({
             </div>
           </section>
           <section className="form-section">
-            <SectionHeading number="03" title="Set the material terms" />
+            <SectionHeading title="Set the material terms" />
             <div className="form-grid">
               <label>
                 Tenor
@@ -1765,25 +1750,15 @@ function ClientEvidence() {
           <div className="client-summary">
             <div>
               <span>Recorded purchases</span>
-              <strong>
-                {shown
-                  .reduce((a, c) => a + c.count, 0)
-                  .toString()
-                  .padStart(2, "0")}
-              </strong>
+              <strong>{shown.reduce((a, c) => a + c.count, 0)}</strong>
             </div>
             <div>
               <span>Fictional profiles</span>
-              <strong>{shown.length.toString().padStart(2, "0")}</strong>
+              <strong>{shown.length}</strong>
             </div>
             <div>
               <span>Profiles with full coverage</span>
-              <strong>
-                {shown
-                  .filter((c) => c.coverage === 4)
-                  .length.toString()
-                  .padStart(2, "0")}
-              </strong>
+              <strong>{shown.filter((c) => c.coverage === 4).length}</strong>
             </div>
             <div>
               <span>Comparison basis</span>
@@ -1791,7 +1766,7 @@ function ClientEvidence() {
               <small>Not holdings or probability</small>
             </div>
           </div>
-          <SectionHeading number="01" title="The historical book">
+          <SectionHeading title="The historical book">
             <label className="inline-search">
               <Icon name="search" size={17} />
               <input
@@ -2094,7 +2069,7 @@ function Analytics() {
           </Note>
         </section>
         <section className="scenario-results">
-          <SectionHeading number="02" title="Cash flows">
+          <SectionHeading title="Cash flows">
             <span className="mono">% OF NOMINAL</span>
           </SectionHeading>
           {!result ? (
@@ -2259,7 +2234,7 @@ function DesignSystem({
           </p>
         </div>
       </div>
-      <SectionHeading number="01" title="Colors and type" />
+      <SectionHeading title="Colors and type" />
       <div className="swatch-grid">
         {[
           ["Paper", "--paper", theme === "night" ? "#171C1A" : "#F7F7F2"],
@@ -2302,7 +2277,7 @@ function DesignSystem({
           </div>
         </div>
       </div>
-      <SectionHeading number="02" title="Shared components" />
+      <SectionHeading title="Shared components" />
       <div className="component-specimens">
         <section>
           <h3>Actions & hierarchy</h3>
@@ -2340,10 +2315,13 @@ function DesignSystem({
             <Tag tone="danger">Validation error</Tag>
             <Tag>Unrankable</Tag>
           </div>
-          <p>Label each status in words. Show missing values as unavailable.</p>
+          <p>
+            Label each status in words. Show missing values as unavailable.
+            Display counts without leading zeros.
+          </p>
         </section>
       </div>
-      <SectionHeading number="03" title="State vocabulary" />
+      <SectionHeading title="State vocabulary" />
       <div className="state-gallery">
         <div className="state-selector">
           {[
@@ -2437,12 +2415,12 @@ function DesignSystem({
           </Tag>
         </div>
       </div>
-      <SectionHeading number="04" title="Prototype features and limits" />
+      <SectionHeading title="Prototype features and limits" />
       <div className="system-rules">
         {[
           [
             "Page layout",
-            "Use rules to group content, 4px spacing increments and controls at least 44px high.",
+            "Use headings, spacing and rules to guide the reader. Do not number sections or lists for decoration. Keep numbers when they identify records, show values or explain a necessary order.",
           ],
           [
             "Keyboard and reading support",
@@ -2452,9 +2430,8 @@ function DesignSystem({
             "Disconnected services",
             "Fictional example data only. The prototype cannot obtain prices, assess suitability, place orders or send information outside this workspace.",
           ],
-        ].map(([title, body], i) => (
+        ].map(([title, body]) => (
           <div key={title}>
-            <span className="number">0{i + 1}</span>
             <h3>{title}</h3>
             <p>{body}</p>
           </div>
